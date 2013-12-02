@@ -180,6 +180,9 @@ void RequestParseTask::operator()() {
                     << urldecode(body_data["query"]) << "\n"
                     << body_data["query"] << "\n"
                     << reader.getFormatedErrorMessages());
+
+      // Forward parsing error
+      _responseTask->addErrorMessage("Parsing: " + reader.getFormatedErrorMessages());      
     }
     // Update the transmission limit for the response task
     if (atoi(body_data["limit"].c_str()) > 0)

@@ -10,4 +10,13 @@ BLD ?= debug
 # Per Default HYRISE is compiled with MySQL support, set to 0 to disable
 # WITH_MYSQL := 1
 
+
+# To enable Apache Thrift
+# PLUGINS += thrift
+
+# To enable Link Time Optimization
+# PLUGINS += lto
+
+# See mkpluings for more Build Plugins
+
 include mysql.mk

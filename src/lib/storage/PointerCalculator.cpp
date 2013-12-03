@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_set>
 
+#include "helper/make_unique.h"
 #include "helper/checked_cast.h"
 #include "helper/PositionsIntersect.h"
 
@@ -64,6 +65,9 @@ hyrise::storage::atable_ptr_t PointerCalculator::copy() const {
 PointerCalculator::~PointerCalculator() {
   delete fields;
   delete pos_list;
+
+  if (_renamed)
+    std::for_each(std::begin(*_renamed), std::end(*_renamed), [](ColumnMetadata *e){ delete e; });
 }
 
 void PointerCalculator::updateFieldMapping() {
@@ -122,12 +126,20 @@ const ColumnMetadata *PointerCalculator::metadataAt(const size_t column_index, c
   size_t actual_column;
 
   if (fields) {
+
+    // Check if we have to access a renamed field
+    if (_renamed && (*_renamed)[column_index])
+      return (*_renamed)[column_index];
+
     actual_column = fields->at(column_index);
   } else {
     actual_column = column_index;
   }
 
-  return table->metadataAt(actual_column);
+  if (_renamed && (*_renamed)[actual_column])
+    return (*_renamed)[actual_column];
+  else
+    return table->metadataAt(actual_column);
 }
 
 void PointerCalculator::setDictionaryAt(AbstractTable::SharedDictionaryPtr dict, const size_t column, const size_t row, const table_id_t table_id) {
@@ -423,4 +435,18 @@ void PointerCalculator::remove(const pos_list_t& pl) {
     return tmp.count(p) != 0u;
   });
   (*pos_list).erase(res, pos_list->end());
+}
+
+
+void PointerCalculator::rename(field_t f, const std::string newName) {
+
+  if (!_renamed) {
+    _renamed = make_unique<std::vector<ColumnMetadata*>>(fields ? fields->size() : table->columnCount(), nullptr);
+  }
+
+  if ((*_renamed)[f]) {
+    delete (*_renamed)[f];
+  }
+
+  (*_renamed)[f] = new ColumnMetadata(newName, table->typeOfColumn(f));
 }

@@ -18,7 +18,7 @@
 template<typename T>
 class InvertedIndex : public AbstractIndex {
 private:
-  typedef std::map<T, pos_list_t> inverted_index_t;
+  using inverted_index_t = std::map<T, pos_list_t>;
   inverted_index_t _index;
 
 public:

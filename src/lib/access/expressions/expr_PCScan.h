@@ -15,7 +15,10 @@
 namespace hyrise { namespace access {
 
 /*
- * Simple class that allows to compare a single field value with one type and one operator
+ * Simple class that allows to compare a single field value with one
+ * type and one operator. The operator can be freely choosen from the
+ * STD Lib functional types and the Value Type should be one of the
+ * HYRISE types
 */
 template<typename ValueType, typename Operator=std::equal_to<ValueType> >
 class PCScan_F1_OP_TYPE : public AbstractExpression {
@@ -44,7 +47,7 @@ class PCScan_F1_OP_TYPE : public AbstractExpression {
     for(size_t r=lower; r < upper; ++r) {
       auto curr_pos = (*_tab_pos_list)[r];
       if (op(_table->getValue<hyrise_int_t>(_f0, curr_pos), _v0)) 
-        pl->push_back(curr_pos);
+        pl->push_back(r);
     }
     return pl;
   }
